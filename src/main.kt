@@ -20,13 +20,5 @@ fun main(args: Array<String>) {
     }
     reader.close()
 
-
-
-
-
-
-
-
     clauses.forEach(::println)
-
 }

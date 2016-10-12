@@ -1,14 +1,14 @@
-data class TermList private constructor(val terms: List<Any>) {
+data class TermList private constructor(val formationTree: MutableList<Term>) {
     constructor(string: String, clauseId: Int) : this(generate(string).map {
         when {
             it.endsWith(')') -> Function(it, clauseId)
             it[0].isLowerCase() -> Variable(it, clauseId)
             else -> Constant(it)
         }
-    })
+    }.toMutableList())
 
     override fun toString(): String {
-        return terms.toString().drop(1).dropLast(1)
+        return formationTree.toString().drop(1).dropLast(1)
     }
 
     private companion object {
@@ -22,7 +22,7 @@ data class TermList private constructor(val terms: List<Any>) {
                     ')' -> parenCount--
                     ',' -> when (parenCount) {
                         0 -> {
-                            return listOf(string.take(i)) + generate(string.drop(i + 1))
+                            return (listOf(string.take(i)) + generate(string.drop(i + 1)))
                         }
                     }
                 }
@@ -30,5 +30,32 @@ data class TermList private constructor(val terms: List<Any>) {
 
             return listOf(string) //reached the end
         }
+    }
+
+    fun replace(t: Term, v: Variable): TermList {
+        return TermList(formationTree.map {
+            when (it) {
+                v -> t
+                else -> v
+            }
+        }.toMutableList())
+    }
+
+    fun firstVariable(): Variable? {
+        formationTree.forEach {
+            if (it is Variable)
+                return it
+        }
+        return null
+    }
+
+    override fun equals(other: Any?) = other is TermList && formationTree.containsAll(other.formationTree) && other.formationTree.containsAll(formationTree)
+
+    fun contains(v: Variable): Boolean {
+        formationTree.forEach {
+            if (it.contains(v))
+                return true
+        }
+        return false
     }
 }

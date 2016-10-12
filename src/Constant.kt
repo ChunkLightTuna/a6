@@ -1,5 +1,15 @@
-data class Constant(val name: String) {
-    override fun toString(): String {
-        return name.toString()
-    }
+data class Constant(val label: String) : Term {
+
+
+    override fun toString() = label
+
+    override fun equals(other: Any?) = other is Constant && label == other.label
+
+    override fun hashCode() = label.hashCode()
+
+    override fun contains(v: Variable) = false
+
+    override fun terms() = null
+
+    override fun l() = label
 }

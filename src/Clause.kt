@@ -29,6 +29,5 @@ data class Clause private constructor(val literals: List<Literal>) {
 
         return sb.toString()
     }
-
 }
 

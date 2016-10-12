@@ -1,7 +1,16 @@
-data class Variable private constructor(val name: String, private val original: String) {
-    constructor(string: String, clauseId: Int) : this("$string$clauseId", string)
+data class Variable(val label: String) : Term {
+    constructor(string: String, clauseId: Int) : this("$string$clauseId")
 
-    override fun toString(): String {
-        return original
-    }
+
+    override fun toString() = label
+
+    override fun equals(other: Any?) = other is Variable && label == other.label
+
+    override fun hashCode() = label.hashCode()
+
+    override fun contains(v: Variable) = equals(v)
+
+    override fun terms() = null
+
+    override fun l() = label
 }
