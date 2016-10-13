@@ -9,10 +9,6 @@ data class Clause private constructor(val literals: List<Literal>) {
             val list = string.split("|").map { Literal(it, ticker) }
             return list
         }
-
-        fun tickleTheTicker(): Int {
-            return ++ticker
-        }
     }
 
     override fun toString(): String {
@@ -28,6 +24,10 @@ data class Clause private constructor(val literals: List<Literal>) {
         }.forEach { sb.append(it) }
 
         return sb.toString()
+    }
+
+    fun update(old: Term, new: Term) {
+        literals.forEach { it.predicate.update(old, new) }
     }
 }
 

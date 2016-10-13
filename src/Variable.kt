@@ -1,5 +1,5 @@
-data class Variable(val label: String) : Term {
-    constructor(string: String, clauseId: Int) : this("$string$clauseId")
+data class Variable(val label: String, val string: String) : Term {
+    constructor(string: String, clauseId: Int) : this("$string$clauseId", string)
 
 
     override fun toString() = label
@@ -12,5 +12,5 @@ data class Variable(val label: String) : Term {
 
     override fun terms() = null
 
-    override fun l() = label
+    override fun label() = label
 }

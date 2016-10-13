@@ -3,5 +3,4 @@
  */
 interface Term: FormationTree {
     fun contains(v: Variable): Boolean
-    fun l(): String
 }

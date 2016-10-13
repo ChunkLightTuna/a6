@@ -1,14 +1,21 @@
-data class TermList private constructor(val formationTree: MutableList<Term>) {
+data class TermList private constructor(val terms: Array<Term>) {
     constructor(string: String, clauseId: Int) : this(generate(string).map {
         when {
             it.endsWith(')') -> Function(it, clauseId)
             it[0].isLowerCase() -> Variable(it, clauseId)
             else -> Constant(it)
         }
-    }.toMutableList())
+    }.toTypedArray())
 
     override fun toString(): String {
-        return formationTree.toString().drop(1).dropLast(1)
+        val sb = StringBuilder()
+        terms.forEachIndexed { i, term ->
+            if(i == terms.size -1) sb.append(term)
+            else sb.append("$term, ")
+        }
+
+        return sb.toString()
+//        return terms.toString().drop(1).dropLast(1)
     }
 
     private companion object {
@@ -33,26 +40,39 @@ data class TermList private constructor(val formationTree: MutableList<Term>) {
     }
 
     fun replace(t: Term, v: Variable): TermList {
-        return TermList(formationTree.map {
+        return TermList(terms.map {
             when (it) {
                 v -> t
                 else -> v
             }
-        }.toMutableList())
+        }.toTypedArray())
     }
 
     fun firstVariable(): Variable? {
-        formationTree.forEach {
+        terms.forEach {
             if (it is Variable)
                 return it
         }
         return null
     }
 
-    override fun equals(other: Any?) = other is TermList && formationTree.containsAll(other.formationTree) && other.formationTree.containsAll(formationTree)
+    override fun equals(other: Any?): Boolean {
+        if (other !is TermList)
+            return false
+
+        terms.forEachIndexed { i, term ->
+            if (terms[i] != other.terms[i]) return false
+        }
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return terms.map(Term::hashCode).reduce { total, next -> total * next }
+    }
 
     fun contains(v: Variable): Boolean {
-        formationTree.forEach {
+        terms.forEach {
             if (it.contains(v))
                 return true
         }

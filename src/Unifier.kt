@@ -9,54 +9,115 @@
 class Unifier {
     //Most General Unifier!
 
+    fun unify(clauseA: Clause, clauseB: Clause) {
+        clauseA.literals.forEach { literalA ->
+            clauseB.literals.forEach { literalB ->
 
-    fun fuckTheBrownCoats(a: Clause, b: Clause) {
+                //skip if sign is the same or predicate labels are different
+                if (literalA.negated != literalB.negated && literalA.predicate.label == literalB.predicate.label) {
 
-        val tmA = a.literals[0].predicate.termList
-        val tmB = b.literals[0].predicate.termList
+                    val clauseCopyA = clauseA.copy()
+                    val clauseCopyB = clauseB.copy()
+                    val literalCopyA = literalA.copy()
+                    val literalCopyB = literalB.copy()
 
-        mgu(tmA, tmB)
-    }
+//                    val asdfA: List<TermList> = copyA.literals.map { it.predicate }.map { it.termList }
 
-    fun mgu(a: TermList, b: TermList): Boolean {
-
-        b.formationTree.forEach {
-            val T_0 = it
-            a.formationTree.forEach {
-                val T_1 = it
-
-                //Compare
-                if (T_0.l() != T_1.l()) {
-                    //Substitute
-
-                    if (T_0 !is Variable && T_1 !is Variable) {
-                        //(a)
-                        return false
-
-
-                    } else if (T_0 is Variable && T_1.contains(T_0) || T_1 is Variable && T_0.contains(T_1)) {
-                        //(b)
-                        return false
-
-
-                    } else {
-                        //(c)
-                        T_0
+                    if (mgu(clauseCopyA, clauseCopyB, literalCopyA.predicate.termList, literalCopyB.predicate.termList)) {
+                        println("$clauseCopyA\n$clauseCopyB\n\n")
                     }
-
-
-                } else {
-                    //Advance
                 }
             }
         }
-
-
-        return false
     }
 
-    private fun validPairing(a: Literal, b: Literal): Boolean {
-        return a.predicate.name == b.predicate.name && a.negated !== b.negated
-                && a.predicate.termList.formationTree.size == b.predicate.termList.formationTree.size
+
+    fun mgu(clauseA: Clause,
+            clauseB: Clause,
+            termListA: TermList,
+            termListB: TermList): Boolean {
+
+        if (termListA.terms.size != termListB.terms.size) {
+            return false
+        }
+
+        for (i in termListA.terms.indices) {
+            val termA = termListA.terms[i]
+            val termB = termListB.terms[i]
+
+            if (termA is Constant && termB is Constant) {//2
+                return termA == termB
+
+            } else if (constAndFun(termA, termB)) {//3
+                return false
+
+            } else if (constAndVar(termA, termB)) {//4
+                clauseB.update(termB, termA)
+//                termListB.terms[i] = termA
+//                println("!!!!!!!!!$termA $termB")
+
+            } else if (constAndVar(termB, termA)) {//4
+                clauseA.update(termA, termB)
+//                termListA.terms[i] = termB
+//                println("!!!!!!!!!$termA $termB")
+
+            } else if (funAndFun(termA, termB)) {//5
+                if (termA.label() != termB.label()) {//6
+                    return false
+                } else {//7
+                    mgu(
+                            clauseA,
+                            clauseB,
+                            (termA as Function).termList,
+                            (termB as Function).termList)
+                }
+
+            } else if (funAndVar(termA, termB)) {
+                if (termA.contains(termB as Variable)) {//8
+                    return false
+                } else {//9
+//                    termListB.terms[i] = termA
+//                    println("!!!!!!!!!$termA $termB")
+                    clauseB.update(termB, termA)
+                }
+
+            } else if (funAndVar(termB, termA)) {
+                if (termB.contains(termA as Variable)) {//8
+                    return false
+                } else {//9
+//                    termListA.terms[i] = termB
+//                    println("!!!!!!!!!$termA $termB")
+                    clauseA.update(termA, termB)
+                }
+
+            } else {//10
+                assert(termA is Variable && termB is Variable)
+//                termListA.terms[i] = termB
+//                println("!!!!!!!!!$termA $termB")
+                clauseA.update(termA, termB)
+            }
+        }
+        return true
+    }
+
+//    private fun validPairing(a: Literal, b: Literal): Boolean {
+//        return a.predicate.label == b.predicate.label && a.negated !== b.negated
+//                && a.predicate.termList.terms.size == b.predicate.termList.terms.size
+//    }
+
+    fun constAndFun(a: Term, b: Term): Boolean {
+        return (a is Constant && b is Function) || (a is Function && b is Constant)
+    }
+
+    fun constAndVar(a: Term, b: Term): Boolean {
+        return a is Constant && b is Variable
+    }
+
+    fun funAndFun(a: Term, b: Term): Boolean {
+        return a is Function && b is Function
+    }
+
+    fun funAndVar(a: Term, b: Term): Boolean {
+        return a is Function && b is Variable
     }
 }

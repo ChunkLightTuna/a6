@@ -11,5 +11,5 @@ data class Constant(val label: String) : Term {
 
     override fun terms() = null
 
-    override fun l() = label
+    override fun label() = label
 }

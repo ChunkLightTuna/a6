@@ -1,10 +1,6 @@
 import java.io.FileInputStream
 import java.util.*
 
-/**
- * Created by ChunkLightTuna on 10/11/16.
- */
-
 fun main(args: Array<String>) {
     args.forEach {
         if (it.endsWith(".cnf")) {
@@ -20,5 +16,10 @@ fun main(args: Array<String>) {
     }
     reader.close()
 
-    clauses.forEach(::println)
+    val unifier = Unifier()
+
+    unifier.unify(clauses[0], clauses[1])
+
+
+//    clauses.forEach(::println)
 }
