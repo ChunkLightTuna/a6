@@ -24,7 +24,7 @@ class Unifier {
 //                    val asdfA: List<TermList> = copyA.literals.map { it.predicate }.map { it.termList }
 
                     if (mgu(clauseCopyA, clauseCopyB, literalCopyA.predicate.termList, literalCopyB.predicate.termList)) {
-                        println("$clauseCopyA\n$clauseCopyB\n\n")
+                        println("$clauseCopyA\n$clauseCopyB\n")
                     }
                 }
             }
