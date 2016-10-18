@@ -1,6 +1,5 @@
 data class Constant(val label: String) : Term {
 
-
     override fun toString() = label
 
     override fun equals(other: Any?) = other is Constant && label == other.label

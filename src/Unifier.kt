@@ -16,8 +16,8 @@ class Unifier {
                 //skip if sign is the same or predicate labels are different
                 if (literalA.negated != literalB.negated && literalA.predicate.label == literalB.predicate.label) {
 
-                    val clauseCopyA = Clause(clauseA)
-                    val clauseCopyB = Clause(clauseB)
+                    val clauseCopyA = clauseA.copy()
+                    val clauseCopyB = clauseB.copy()
                     val literalCopyA = literalA.copy()
                     val literalCopyB = literalB.copy()
 

@@ -2,8 +2,6 @@ data class Predicate private constructor(val label: String, val termList: TermLi
     constructor(string: String, clauseId: Int) :
     this(string.takeWhile { it != '(' }, TermList(string.dropWhile { it != '(' }.drop(1).dropLast(1), clauseId))
 
-    constructor(predicate: Predicate) : this(predicate.label, TermList(predicate.termList))
-
     override fun toString() = "$label($termList)"
 
     override fun terms() = termList
@@ -16,4 +14,6 @@ data class Predicate private constructor(val label: String, val termList: TermLi
             }
         }
     }
+
+    fun copy() = Predicate(label, termList.copy())
 }

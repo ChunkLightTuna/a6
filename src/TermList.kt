@@ -7,9 +7,6 @@ data class TermList private constructor(val terms: Array<Term>) {
         }
     }.toTypedArray())
 
-
-    constructor(termList: TermList) : this(generate(termList))
-
     override fun toString(): String {
         val sb = StringBuilder()
         terms.forEachIndexed { i, term ->
@@ -38,9 +35,6 @@ data class TermList private constructor(val terms: Array<Term>) {
 
             return listOf(string) //reached the end
         }
-
-        fun generate(termList: TermList) = termList.terms.map(Term::copy).toTypedArray()
-
     }
 
 //    fun replace(t: Term, v: Variable): TermList {
@@ -80,4 +74,6 @@ data class TermList private constructor(val terms: Array<Term>) {
         }
         return false
     }
+
+    fun copy() = TermList(terms.map(Term::copy).toTypedArray())
 }

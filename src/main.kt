@@ -4,7 +4,7 @@ import java.util.*
 fun main(args: Array<String>) {
     args.forEach {
 //        if (it.endsWith(".cnf")) {
-            System.setIn(FileInputStream("sample-input/p2.cnf"))
+            System.setIn(FileInputStream("sample-input/b2.cnf"))
 //        }
     }
     val reader = System.`in`

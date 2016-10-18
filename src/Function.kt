@@ -14,5 +14,5 @@ data class Function private constructor(val label: String, val termList: TermLis
 
     override fun label() = label
 
-    override fun copy() = Function(label, TermList(termList))
+    override fun copy() = Function(label, termList.copy())
 }
