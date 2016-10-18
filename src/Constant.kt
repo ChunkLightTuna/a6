@@ -12,4 +12,6 @@ data class Constant(val label: String) : Term {
     override fun terms() = null
 
     override fun label() = label
+
+    override fun copy() = Constant(label)
 }

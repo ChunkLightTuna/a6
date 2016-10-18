@@ -3,9 +3,9 @@ import java.util.*
 
 fun main(args: Array<String>) {
     args.forEach {
-        if (it.endsWith(".cnf")) {
-            System.setIn(FileInputStream(it))
-        }
+//        if (it.endsWith(".cnf")) {
+            System.setIn(FileInputStream("sample-input/p2.cnf"))
+//        }
     }
     val reader = System.`in`
     val clauses = ArrayList<Clause>()

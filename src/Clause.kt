@@ -2,6 +2,8 @@ data class Clause private constructor(val literals: List<Literal>) {
 
     constructor(string: String) : this(generate(string))
 
+    constructor(clause: Clause) : this(generate(clause))
+
     companion object {
         var ticker = 0
         fun generate(string: String): List<Literal> {
@@ -9,6 +11,8 @@ data class Clause private constructor(val literals: List<Literal>) {
             val list = string.split("|").map { Literal(it, ticker) }
             return list
         }
+
+        fun generate(clause: Clause): List<Literal> = clause.literals.map(::Literal)
     }
 
     override fun toString(): String {
@@ -26,8 +30,7 @@ data class Clause private constructor(val literals: List<Literal>) {
         return sb.toString()
     }
 
-    fun update(old: Term, new: Term) {
-        literals.forEach { it.predicate.update(old, new) }
+    fun update(old: Term, new: Term) = literals.forEach {
+        it.predicate.update(old, new)
     }
 }
-

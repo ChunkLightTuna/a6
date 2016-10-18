@@ -7,15 +7,16 @@ data class TermList private constructor(val terms: Array<Term>) {
         }
     }.toTypedArray())
 
+
+    constructor(termList: TermList) : this(generate(termList))
+
     override fun toString(): String {
         val sb = StringBuilder()
         terms.forEachIndexed { i, term ->
-            if(i == terms.size -1) sb.append(term)
+            if (i == terms.size - 1) sb.append(term)
             else sb.append("$term, ")
         }
-
         return sb.toString()
-//        return terms.toString().drop(1).dropLast(1)
     }
 
     private companion object {
@@ -37,24 +38,27 @@ data class TermList private constructor(val terms: Array<Term>) {
 
             return listOf(string) //reached the end
         }
+
+        fun generate(termList: TermList) = termList.terms.map(Term::copy).toTypedArray()
+
     }
 
-    fun replace(t: Term, v: Variable): TermList {
-        return TermList(terms.map {
-            when (it) {
-                v -> t
-                else -> v
-            }
-        }.toTypedArray())
-    }
-
-    fun firstVariable(): Variable? {
-        terms.forEach {
-            if (it is Variable)
-                return it
-        }
-        return null
-    }
+//    fun replace(t: Term, v: Variable): TermList {
+//        return TermList(terms.map {
+//            when (it) {
+//                v -> t
+//                else -> v
+//            }
+//        }.toTypedArray())
+//    }
+//
+//    fun firstVariable(): Variable? {
+//        terms.forEach {
+//            if (it is Variable)
+//                return it
+//        }
+//        return null
+//    }
 
     override fun equals(other: Any?): Boolean {
         if (other !is TermList)
@@ -67,9 +71,7 @@ data class TermList private constructor(val terms: Array<Term>) {
         return true
     }
 
-    override fun hashCode(): Int {
-        return terms.map(Term::hashCode).reduce { total, next -> total * next }
-    }
+    override fun hashCode() = terms.map(Term::hashCode).reduce { total, next -> total * next }
 
     fun contains(v: Variable): Boolean {
         terms.forEach {

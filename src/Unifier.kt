@@ -16,14 +16,14 @@ class Unifier {
                 //skip if sign is the same or predicate labels are different
                 if (literalA.negated != literalB.negated && literalA.predicate.label == literalB.predicate.label) {
 
-                    val clauseCopyA = clauseA.copy()
-                    val clauseCopyB = clauseB.copy()
+                    val clauseCopyA = Clause(clauseA)
+                    val clauseCopyB = Clause(clauseB)
                     val literalCopyA = literalA.copy()
                     val literalCopyB = literalB.copy()
 
 //                    val asdfA: List<TermList> = copyA.literals.map { it.predicate }.map { it.termList }
 
-                    if (mgu(clauseCopyA, clauseCopyB, literalCopyA.predicate.termList, literalCopyB.predicate.termList)) {
+                    if (mostGeneralUnifier(clauseCopyA, clauseCopyB, literalCopyA.predicate.termList, literalCopyB.predicate.termList)) {
                         println("$clauseCopyA\n$clauseCopyB\n")
                     }
                 }
@@ -32,10 +32,10 @@ class Unifier {
     }
 
 
-    fun mgu(clauseA: Clause,
-            clauseB: Clause,
-            termListA: TermList,
-            termListB: TermList): Boolean {
+    fun mostGeneralUnifier(clauseA: Clause,
+                           clauseB: Clause,
+                           termListA: TermList,
+                           termListB: TermList): Boolean {
 
         if (termListA.terms.size != termListB.terms.size) {
             return false
@@ -49,6 +49,7 @@ class Unifier {
                 return termA == termB
 
             } else if (constAndFun(termA, termB)) {//3
+                println("3 $termA $termB")
                 return false
 
             } else if (constAndVar(termA, termB)) {//4
@@ -63,9 +64,10 @@ class Unifier {
 
             } else if (funAndFun(termA, termB)) {//5
                 if (termA.label() != termB.label()) {//6
+                    println("6 $termA $termB")
                     return false
                 } else {//7
-                    mgu(
+                    mostGeneralUnifier(
                             clauseA,
                             clauseB,
                             (termA as Function).termList,
@@ -74,6 +76,7 @@ class Unifier {
 
             } else if (funAndVar(termA, termB)) {
                 if (termA.contains(termB as Variable)) {//8
+                    println("81 $termA $termB")
                     return false
                 } else {//9
 //                    termListB.terms[i] = termA
@@ -83,6 +86,7 @@ class Unifier {
 
             } else if (funAndVar(termB, termA)) {
                 if (termB.contains(termA as Variable)) {//8
+                    println("82 $termA $termB")
                     return false
                 } else {//9
 //                    termListA.terms[i] = termB
@@ -105,19 +109,11 @@ class Unifier {
 //                && a.predicate.termList.terms.size == b.predicate.termList.terms.size
 //    }
 
-    fun constAndFun(a: Term, b: Term): Boolean {
-        return (a is Constant && b is Function) || (a is Function && b is Constant)
-    }
+    fun constAndFun(a: Term, b: Term) = (a is Constant && b is Function) || (a is Function && b is Constant)
 
-    fun constAndVar(a: Term, b: Term): Boolean {
-        return a is Constant && b is Variable
-    }
+    fun constAndVar(a: Term, b: Term) = a is Constant && b is Variable
 
-    fun funAndFun(a: Term, b: Term): Boolean {
-        return a is Function && b is Function
-    }
+    fun funAndFun(a: Term, b: Term) = a is Function && b is Function
 
-    fun funAndVar(a: Term, b: Term): Boolean {
-        return a is Function && b is Variable
-    }
+    fun funAndVar(a: Term, b: Term) = a is Function && b is Variable
 }
