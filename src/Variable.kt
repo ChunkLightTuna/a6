@@ -7,7 +7,7 @@ data class Variable(val label: String, val string: String) : Term {
 
     override fun hashCode() = label.hashCode()
 
-    override fun contains(v: Variable) = equals(v)
+    override fun contains(term: Term) = equals(term)
 
     override fun terms() = null
 
@@ -16,3 +16,4 @@ data class Variable(val label: String, val string: String) : Term {
     override fun copy() = Variable(label, string)
 
 }
+

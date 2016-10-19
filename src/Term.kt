@@ -1,4 +1,5 @@
 interface Term: FormationTree {
-    fun contains(v: Variable): Boolean
+    fun contains(term: Term): Boolean
     fun copy(): Term
 }
+

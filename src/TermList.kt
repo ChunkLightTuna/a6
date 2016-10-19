@@ -67,9 +67,9 @@ data class TermList private constructor(val terms: Array<Term>) {
 
     override fun hashCode() = terms.map(Term::hashCode).reduce { total, next -> total * next }
 
-    fun contains(v: Variable): Boolean {
+    fun contains(term: Term): Boolean {
         terms.forEach {
-            if (it.contains(v))
+            if (it.contains(term))
                 return true
         }
         return false
@@ -77,3 +77,4 @@ data class TermList private constructor(val terms: Array<Term>) {
 
     fun copy() = TermList(terms.map(Term::copy).toTypedArray())
 }
+

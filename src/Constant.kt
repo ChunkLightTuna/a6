@@ -6,7 +6,7 @@ data class Constant(val label: String) : Term {
 
     override fun hashCode() = label.hashCode()
 
-    override fun contains(v: Variable) = false
+    override fun contains(term: Term) = this == term
 
     override fun terms() = null
 
@@ -14,3 +14,4 @@ data class Constant(val label: String) : Term {
 
     override fun copy() = Constant(label)
 }
+

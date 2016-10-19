@@ -21,8 +21,6 @@ class Unifier {
                     val literalCopyA = literalA.copy()
                     val literalCopyB = literalB.copy()
 
-//                    val asdfA: List<TermList> = copyA.literals.map { it.predicate }.map { it.termList }
-
                     if (mostGeneralUnifier(clauseCopyA, clauseCopyB, literalCopyA.predicate.termList, literalCopyB.predicate.termList)) {
                         println("$clauseCopyA\n$clauseCopyB\n")
                     }
@@ -37,6 +35,10 @@ class Unifier {
                            termListA: TermList,
                            termListB: TermList): Boolean {
 
+        val containerA = Predicate("", termListA)
+        val containerB = Predicate("", termListB)
+
+
         if (termListA.terms.size != termListB.terms.size) {
             return false
         }
@@ -45,69 +47,67 @@ class Unifier {
             val termA = termListA.terms[i]
             val termB = termListB.terms[i]
 
-            if (termA is Constant && termB is Constant) {//2
-                return termA == termB
+            when {
+                constAndConst(termA, termB) -> if (termA != termB) return false
 
-            } else if (constAndFun(termA, termB)) {//3
-                println("3 $termA $termB")
-                return false
+                constAndFun(termA, termB) -> return false
 
-            } else if (constAndVar(termA, termB)) {//4
-                clauseB.update(termB, termA)
-//                termListB.terms[i] = termA
-//                println("!!!!!!!!!$termA $termB")
-
-            } else if (constAndVar(termB, termA)) {//4
-                clauseA.update(termA, termB)
-//                termListA.terms[i] = termB
-//                println("!!!!!!!!!$termA $termB")
-
-            } else if (funAndFun(termA, termB)) {//5
-                if (termA.label() != termB.label()) {//6
-                    println("6 $termA $termB")
-                    return false
-                } else {//7
-                    mostGeneralUnifier(
-                            clauseA,
-                            clauseB,
-                            (termA as Function).termList,
-                            (termB as Function).termList)
+                constAndVar(termA, termB) -> {
+                    update(clauseB, clauseA, containerA, containerB, termB, termA)
                 }
 
-            } else if (funAndVar(termA, termB)) {
-                if (termA.contains(termB as Variable)) {//8
-                    println("81 $termA $termB")
-                    return false
-                } else {//9
-//                    termListB.terms[i] = termA
-//                    println("!!!!!!!!!$termA $termB")
-                    clauseB.update(termB, termA)
+                constAndVar(termB, termA) -> {
+                    update(clauseA, clauseB, containerA, containerB, termA, termB)
                 }
 
-            } else if (funAndVar(termB, termA)) {
-                if (termB.contains(termA as Variable)) {//8
-                    println("82 $termA $termB")
-                    return false
-                } else {//9
-//                    termListA.terms[i] = termB
-//                    println("!!!!!!!!!$termA $termB")
-                    clauseA.update(termA, termB)
+                funAndFun(termA, termB) -> {
+                    if (termA.label() != termB.label()) {//6
+                        return false
+                    } else {//7
+                        mostGeneralUnifier(
+                                clauseA,
+                                clauseB,
+                                (termA as Function).termList,
+                                (termB as Function).termList)
+                    }
                 }
 
-            } else {//10
-                assert(termA is Variable && termB is Variable)
-//                termListA.terms[i] = termB
-//                println("!!!!!!!!!$termA $termB")
-                clauseA.update(termA, termB)
+                funAndVar(termA, termB) -> {
+//                    println("8a fun:\"$termA\" var:\"$termB\" contains: ${termA.contains(termB as Variable)}")
+                    if (termA.contains(termB)) {//8
+                        return false
+                    } else {//9
+                        update(clauseA, clauseB, containerA, containerB, termB, termA)
+                    }
+                }
+
+                funAndVar(termB, termA) -> {
+                    if (termB.contains(termA as Variable)) {//8
+                        return false
+                    } else {//9
+                        update(clauseA, clauseB, containerA, containerB, termA, termB)
+                    }
+                }
+
+                else -> {
+                    assert(termA is Variable && termB is Variable)
+//                    println("10 fun:\"$termA\" var:\"$termB\" contains: ${termA.contains(termB as Variable)}")
+                    update(clauseA, clauseB, containerA, containerB, termA, termB)
+                }
+
             }
         }
         return true
     }
 
-//    private fun validPairing(a: Literal, b: Literal): Boolean {
-//        return a.predicate.label == b.predicate.label && a.negated !== b.negated
-//                && a.predicate.termList.terms.size == b.predicate.termList.terms.size
-//    }
+    private fun update(clauseA: Clause, clauseB: Clause, containerA: Predicate, containerB: Predicate, termA: Term, termB: Term) {
+        clauseA.update(termA, termB)
+        clauseB.update(termA, termB)
+        containerA.update(termA, termB)
+        containerB.update(termA, termB)
+    }
+
+    fun constAndConst(a: Term, b: Term) = a is Constant && b is Constant
 
     fun constAndFun(a: Term, b: Term) = (a is Constant && b is Function) || (a is Function && b is Constant)
 
@@ -117,3 +117,4 @@ class Unifier {
 
     fun funAndVar(a: Term, b: Term) = a is Function && b is Variable
 }
+

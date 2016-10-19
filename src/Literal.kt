@@ -5,3 +5,4 @@ data class Literal private constructor(val negated: Boolean, val predicate: Pred
 
     fun copy() = Literal(negated, predicate.copy())
 }
+

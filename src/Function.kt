@@ -8,7 +8,22 @@ data class Function private constructor(val label: String, val termList: TermLis
 
     override fun hashCode() = label.hashCode() * termList.hashCode()
 
-    override fun contains(v: Variable) = termList.contains(v)
+    override fun contains(term: Term) = termList.contains(term)
+
+    fun update(old: Term, new: Term) {
+
+//        println("terms old:$termList")
+        termList.terms.forEachIndexed { i, term ->
+            if (term.contains(old)) {
+                if (term is Function) {
+                    term.update(old, new)
+                } else {
+                    assert(term is Variable)
+                    if (term == old) termList.terms[i] = new
+                }
+            }
+        }
+    }
 
     override fun terms() = termList
 
@@ -16,3 +31,4 @@ data class Function private constructor(val label: String, val termList: TermLis
 
     override fun copy() = Function(label, termList.copy())
 }
+

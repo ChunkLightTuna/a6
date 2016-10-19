@@ -3,9 +3,9 @@ import java.util.*
 
 fun main(args: Array<String>) {
     args.forEach {
-//        if (it.endsWith(".cnf")) {
-            System.setIn(FileInputStream("sample-input/b2.cnf"))
-//        }
+        if (it.endsWith(".cnf")) {
+            System.setIn(FileInputStream("sample-input/e4.cnf"))
+        }
     }
     val reader = System.`in`
     val clauses = ArrayList<Clause>()
@@ -19,7 +19,4 @@ fun main(args: Array<String>) {
     val unifier = Unifier()
 
     unifier.unify(clauses[0], clauses[1])
-
-
-//    clauses.forEach(::println)
 }
