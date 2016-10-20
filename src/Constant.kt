@@ -13,5 +13,7 @@ data class Constant(val label: String) : Term {
     override fun label() = label
 
     override fun copy() = Constant(label)
+
+    override fun closeEnough(term: Term) = term is Constant
 }
 

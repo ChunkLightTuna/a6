@@ -6,12 +6,17 @@
 
 //predicate -> formation tree
 //term ->
+
+data class ShittySingleContainer(val clause: Clause, val i: Int, val j: Int)
+
 class Unifier {
     //Most General Unifier!
 
-    fun unify(clauseA: Clause, clauseB: Clause) {
-        clauseA.literals.forEach { literalA ->
-            clauseB.literals.forEach { literalB ->
+    fun unify(clauseA: Clause, clauseB: Clause): List<ShittySingleContainer> {
+        val out = mutableListOf<ShittySingleContainer>()
+
+        clauseA.literals.forEachIndexed { i, literalA ->
+            clauseB.literals.forEachIndexed { j, literalB ->
 
                 //skip if sign is the same or predicate labels are different
                 if (literalA.negated != literalB.negated && literalA.predicate.label == literalB.predicate.label) {
@@ -22,13 +27,15 @@ class Unifier {
                     val literalCopyB = literalB.copy()
 
                     if (mostGeneralUnifier(clauseCopyA, clauseCopyB, literalCopyA.predicate.termList, literalCopyB.predicate.termList)) {
-                        println("$clauseCopyA\n$clauseCopyB\n")
+                        out.add(ShittySingleContainer(clauseCopyA, i, j))
+                        out.add(ShittySingleContainer(clauseCopyB, i, j))
+//                        println("$clauseCopyA\n$clauseCopyB\n")
                     }
                 }
             }
         }
+        return out
     }
-
 
     fun mostGeneralUnifier(clauseA: Clause,
                            clauseB: Clause,
@@ -82,6 +89,7 @@ class Unifier {
                 }
 
                 funAndVar(termB, termA) -> {
+//                    println("8b fun:\"$termA\" var:\"$termB\" contains: ${termA.contains(termB as Variable)}")
                     if (termB.contains(termA as Variable)) {//8
                         return false
                     } else {//9

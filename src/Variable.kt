@@ -15,5 +15,6 @@ data class Variable(val label: String, val string: String) : Term {
 
     override fun copy() = Variable(label, string)
 
+    override fun closeEnough(term: Term) = term is Variable
 }
 

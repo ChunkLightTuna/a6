@@ -37,23 +37,6 @@ data class TermList private constructor(val terms: Array<Term>) {
         }
     }
 
-//    fun replace(t: Term, v: Variable): TermList {
-//        return TermList(terms.map {
-//            when (it) {
-//                v -> t
-//                else -> v
-//            }
-//        }.toTypedArray())
-//    }
-//
-//    fun firstVariable(): Variable? {
-//        terms.forEach {
-//            if (it is Variable)
-//                return it
-//        }
-//        return null
-//    }
-
     override fun equals(other: Any?): Boolean {
         if (other !is TermList)
             return false
@@ -76,5 +59,14 @@ data class TermList private constructor(val terms: Array<Term>) {
     }
 
     fun copy() = TermList(terms.map(Term::copy).toTypedArray())
+
+    fun closeEnough(termList:TermList) :Boolean {
+        terms.forEachIndexed { i, term ->
+            if (!termList.terms[i].closeEnough(term)) {
+                return false
+            }
+        }
+        return true
+    }
 }
 

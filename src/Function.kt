@@ -30,5 +30,8 @@ data class Function private constructor(val label: String, val termList: TermLis
     override fun label() = label
 
     override fun copy() = Function(label, termList.copy())
+
+    override fun closeEnough(term: Term) = term is Function && term.label == label && term.termList.closeEnough(termList)
+
 }
 

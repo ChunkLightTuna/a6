@@ -7,10 +7,14 @@ data class Predicate(val label: String, val termList: TermList) : FormationTree 
     override fun terms() = termList
     override fun label() = label
 
+    override fun equals(other: Any?) = other is Predicate && other.termList == termList && other.label == label
+
+    override fun hashCode(): Int {
+        return termList.hashCode() * label.hashCode()
+    }
 
     fun update(old: Term, new: Term) {
         termList.terms.forEachIndexed { i, term ->
-//            println("term:${termList.terms[i]} old:$old new:$new TcO:${termList.terms[i].contains(old)}")
             if (termList.terms[i].contains(old)) {
                 if (termList.terms[i] is Function) {
                     (termList.terms[i] as Function).update(old, new)
@@ -18,12 +22,14 @@ data class Predicate(val label: String, val termList: TermList) : FormationTree 
                     assert(termList.terms[i] is Variable)
                     if (termList.terms[i] == old) termList.terms[i] = new
                 }
-//                println("updated!:${termList.terms[i]}")
             }
-//            println("")
         }
     }
 
     fun copy() = Predicate(label, termList.copy())
+
+    fun closeEnough(predicate:Predicate):Boolean {
+        return label == predicate.label && termList.closeEnough(predicate.termList)
+    }
 }
 
