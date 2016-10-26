@@ -1,0 +1,1 @@
+data class Result(val node: Node?, val generated: Int, val expanded: Int)
