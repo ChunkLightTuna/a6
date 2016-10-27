@@ -1,5 +1,4 @@
-
-data class Predicate private constructor(val name: String, val args: List<String>) {
+data class Predicate(val name: String, val args: List<String>) {
     private constructor(predicate: Predicate) : this(predicate.name, predicate.args)
     constructor(string: String) : this(gen(string))
 
@@ -26,5 +25,18 @@ data class Predicate private constructor(val name: String, val args: List<String
                         .map(::Predicate)
             }
         }
+    }
+
+    override fun equals(other: Any?) =
+            other is Predicate &&
+                    name == other.name &&
+                    args.containsAll(other.args) &&
+                    other.args.containsAll(args)
+
+    override fun hashCode(): Int {
+        var k = 0
+        args.forEachIndexed { i, s -> k += (i + 1) * s.hashCode() }
+
+        return name.hashCode() + k
     }
 }

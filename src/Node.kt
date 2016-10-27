@@ -1,6 +1,7 @@
 data class Node(
         val state: State,
         val parent: Node? = null,
+        val action: Action? = null,
         var gValue: Int = 0,
         var fValue: Int = 0) : Comparable<Node> {
 
@@ -11,6 +12,9 @@ data class Node(
     //this -> goalNode is estimated by hValue
     //so fValue = gValue + hValue
     //or hValue = fValue - gValue
+
+    constructor(init: List<Predicate>) : this(State(init, listOf()))
+
 
     constructor(
             state: State,
@@ -40,9 +44,17 @@ data class Node(
 
         domain.actions.forEach {
             if (state.pos.containsAll(it.pre) && state.neg.containsAll(it.preNeg)) {
-                val newPos = state.pos.plus(it.add).minus(it.del)
-                val newNeg = state.neg.minus(it.add).plus(it.del)
-                children.add(Node(State(newPos, newNeg), this, gValue + 1, 0))
+                val newPos = state.pos + it.add - it.del
+                val newNeg = state.neg - it.add + it.del
+                children.add(
+                        Node(
+                                State(newPos, newNeg),
+                                this,
+                                it,
+                                gValue + 1,
+                                0
+                        )
+                )
             }
         }
 

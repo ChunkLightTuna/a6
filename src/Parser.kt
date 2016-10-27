@@ -7,7 +7,7 @@ import java.io.InputStream
 class Parser() {
 
     companion object {
-        fun parse(reader: InputStream): Domain {
+        fun parse(reader: InputStream, hFun: (Domain, Node) -> Int): Domain {
             val actions = mutableListOf<Action>()
 
             var desc = ""
@@ -24,7 +24,6 @@ class Parser() {
             val goalNeg = mutableListOf<Predicate>()
             var numActions = 0
 
-//            println("ACTIONS::")
             reader.bufferedReader().lines().forEach {
                 when {
                     it.startsWith("predicates: ") -> {
@@ -75,11 +74,10 @@ class Parser() {
             reader.close()
 
             assert(numActions == actions.size)
-            return Domain.getInstance(predicates, initConstants, constants, actions, initState, goal, goalNeg)
+            return Domain.getInstance(predicates, initConstants, constants, actions, initState, goal, goalNeg, hFun)
         }
     }
 }
-
 
 fun genConstants(string: String): List<String> {
     return string.split(" ")
