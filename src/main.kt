@@ -10,7 +10,7 @@ fun main(args: Array<String>) {
 
     val heuristics: Map<String, (Domain, Node) -> Int> = mapOf(
             "h0" to { domain, node -> 0 }, //no heuristic! doesn't work!
-            "h1" to { domain, node -> (domain.goal - node.state).size/* + (domain.goalNeg - node.state.neg).size*/ }
+            "h-goal-lits" to { domain, node -> (domain.goal - node.state).size + domain.goalNeg.intersect(node.state).size }
     )
     var hPrime: (Domain, Node) -> Int = { domain, node -> 0 }
     var weight = 1.0
@@ -18,7 +18,6 @@ fun main(args: Array<String>) {
     args.forEach {
         if (it.endsWith(".in")) {
             System.setIn(FileInputStream(it))
-            //            System.setIn(FileInputStream("sample-input/study2.in"))
         } else if (!hSet && heuristics.containsKey(it)) {
             hPrime = heuristics[it]!!
             hSet = true
@@ -28,13 +27,11 @@ fun main(args: Array<String>) {
                 assert(weight >= 1)
             } catch (e: Exception) {
                 weight = 1.0
-                println("expecting weight as an int >= 1")
+                println("expecting weight to be >= 1")
             }
         }
     }
 
-//    hPrime = heuristics["h1"]!!
-//    weight = 1.0
     val hFun: (Domain, Node) -> Int = { domain, node -> (hPrime(domain, node) * weight).toInt() }
 
 
@@ -56,6 +53,7 @@ fun main(args: Array<String>) {
     }
 
     var tick = 0
+
     while (!stack.isEmpty()) {
 
         val action = stack.pop()
@@ -71,7 +69,6 @@ fun main(args: Array<String>) {
         10 nodes generated
         4 nodes expanded
         */
-
         tick++
     }
 

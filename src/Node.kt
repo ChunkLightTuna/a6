@@ -86,23 +86,6 @@ data class Node(
                                 domain.gFun,
                                 domain.hFun
                         )
-                        /*
-                        constructor(
-                        state: List<Predicate>,
-                        parent: Node,
-                        action: Action,
-                        gFun: (Node) -> Int,
-                        hFun: (Node) -> Int)
-                        */
-
-
-//                        Node(
-//                                newPos,
-//                                this,
-//                                it,
-//                                gValue + 1,
-//                                0
-//                        )
                 )
             }
         }

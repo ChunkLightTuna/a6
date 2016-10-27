@@ -3,7 +3,6 @@
  */
 class Domain private constructor(
         val predicates: List<Predicate>,
-        val initConstants: List<String>,
         val constants: List<String>,
         val actions: List<Action>,
         val initState: List<Predicate>,
@@ -23,15 +22,7 @@ class Domain private constructor(
                 goalNeg: List<Predicate>,
                 hFun: (Domain, Node) -> Int): Domain {
 
-//            println("predicates:$predicates\n" +
-//                    "initConstants:$initConstants\n" +
-//                    "constants:$constants\n" +
-//                    "actions:$actions\n" +
-//                    "initState:$initState\n" +
-//                    "goal:$goal\n" +
-//                    "goalNeg:$goalNeg\n")
-
-            val allConst = constants + initConstants
+            val allConstants = constants + initConstants
             val allActions = mutableListOf<Action>()
 
             actions.forEach {
@@ -40,21 +31,21 @@ class Domain private constructor(
 
                 //more than this would be cruel, but this should be done w/o ifs!
                 if (numVars == 1) {
-                    allActions.addAll(allConst.map { action.replace(listOf(it)) })
+                    allActions.addAll(allConstants.map { action.replace(listOf(it)) })
                 }
 
                 if (numVars == 2) {
-                    allActions.addAll(allConst.flatMap { i ->
-                        allConst.map { j ->
+                    allActions.addAll(allConstants.flatMap { i ->
+                        allConstants.map { j ->
                             listOf(i, j)
                         }
                     }.map { action.replace(it) })
                 }
 
                 if (numVars == 3) {
-                    allActions.addAll(allConst.flatMap { i ->
-                        allConst.flatMap { j ->
-                            allConst.map { k ->
+                    allActions.addAll(allConstants.flatMap { i ->
+                        allConstants.flatMap { j ->
+                            allConstants.map { k ->
                                 listOf(i, j, k)
                             }
                         }
@@ -62,10 +53,10 @@ class Domain private constructor(
                 }
 
                 if (numVars == 4) {
-                    allActions.addAll(allConst.flatMap { i ->
-                        allConst.flatMap { j ->
-                            allConst.flatMap { k ->
-                                allConst.map { l ->
+                    allActions.addAll(allConstants.flatMap { i ->
+                        allConstants.flatMap { j ->
+                            allConstants.flatMap { k ->
+                                allConstants.map { l ->
                                     listOf(i, j, k, l)
                                 }
                             }
@@ -74,13 +65,11 @@ class Domain private constructor(
                 }
             }
 
-
             val gFun: (Node) -> Int = { node -> node.parent!!.gValue + 1 }
 
             return Domain(
                     predicates = predicates,
-                    initConstants = initConstants,
-                    constants = constants,
+                    constants = allConstants,
                     actions = allActions,
                     initState = initState,
                     goal = goal,
