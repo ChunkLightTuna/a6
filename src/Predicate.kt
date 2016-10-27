@@ -27,11 +27,21 @@ data class Predicate(val name: String, val args: List<String>) {
         }
     }
 
-    override fun equals(other: Any?) =
-            other is Predicate &&
-                    name == other.name &&
-                    args.containsAll(other.args) &&
-                    other.args.containsAll(args)
+    override fun equals(other: Any?): Boolean {
+        if (!(other is Predicate && name == other.name)) {
+            return false
+        }
+
+        //inefficient, but they're small so w/e
+        args.forEachIndexed { i, s ->
+            if (s != other.args[i]) {
+                return false
+            }
+        }
+
+        return true
+    }
+
 
     override fun hashCode(): Int {
         var k = 0

@@ -1,5 +1,3 @@
-import java.util.*
-
 data class Action(val name: String, val vars: List<String>, val pre: List<Predicate>, val preNeg: List<Predicate>, val del: List<Predicate>, val add: List<Predicate>) {
 
     companion object {

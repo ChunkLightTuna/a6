@@ -7,6 +7,10 @@ import java.io.InputStream
 class Parser() {
 
     companion object {
+        fun genConstants(string: String): List<String> {
+            return string.split(" ")
+        }
+
         fun parse(reader: InputStream, hFun: (Domain, Node) -> Int): Domain {
             val actions = mutableListOf<Action>()
 
@@ -77,8 +81,4 @@ class Parser() {
             return Domain.getInstance(predicates, initConstants, constants, actions, initState, goal, goalNeg, hFun)
         }
     }
-}
-
-fun genConstants(string: String): List<String> {
-    return string.split(" ")
 }

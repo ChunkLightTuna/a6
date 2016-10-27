@@ -1,5 +1,3 @@
-import java.util.*
-
 /**
  * Created by ChunkLightTuna on 10/24/16.
  */
@@ -24,37 +22,14 @@ class Domain private constructor(
                 goal: List<Predicate>,
                 goalNeg: List<Predicate>,
                 hFun: (Domain, Node) -> Int): Domain {
-//
-//            var increment = 0
-//
-//
-//            val hm = HashMap<Int, String>()
-//
-//            constants.plus(initConstants).forEach {
-//
-//
-//            }
-//
 
-//            constants.forEach { hm.put(increment++, it) }
-
-
-            println("predicates:$predicates\n" +
-                    "initConstants:$initConstants\n" +
-                    "constants:$constants\n" +
-                    "actions:$actions\n" +
-                    "initState:$initState\n" +
-                    "goal:$goal\n" +
-                    "goalNeg:$goalNeg\n")
-//
-//            predicates.forEach {
-//
-//                val predicate: Predicate = it
-//
-////                predicate.
-//
-//            }
-
+//            println("predicates:$predicates\n" +
+//                    "initConstants:$initConstants\n" +
+//                    "constants:$constants\n" +
+//                    "actions:$actions\n" +
+//                    "initState:$initState\n" +
+//                    "goal:$goal\n" +
+//                    "goalNeg:$goalNeg\n")
 
             val allConst = constants + initConstants
             val allActions = mutableListOf<Action>()
@@ -63,11 +38,10 @@ class Domain private constructor(
                 val action = it
                 val numVars = action.vars.size
 
-
+                //more than this would be cruel, but this should be done w/o ifs!
                 if (numVars == 1) {
                     allActions.addAll(allConst.map { action.replace(listOf(it)) })
                 }
-
 
                 if (numVars == 2) {
                     allActions.addAll(allConst.flatMap { i ->
@@ -87,7 +61,7 @@ class Domain private constructor(
                     }.map { action.replace(it) })
                 }
 
-                if (numVars == 4) {//more than this would be cruel, but this should be done w/o ifs!
+                if (numVars == 4) {
                     allActions.addAll(allConst.flatMap { i ->
                         allConst.flatMap { j ->
                             allConst.flatMap { k ->
