@@ -92,7 +92,7 @@ fun a_star(domain: Domain): Result {
 
 //        println(current)
 
-        if (current.state.containsAll(domain.goal) && current.state.intersect(domain.goalNeg).isEmpty()/* && current.state.neg.containsAll(domain.goalNeg)*/) {
+        if (current.state.containsAll(domain.goal) && current.state.intersect(domain.goalNeg).isEmpty()) {
             goal = current
             break
         }
