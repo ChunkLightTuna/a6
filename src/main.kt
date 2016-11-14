@@ -1,115 +1,142 @@
+import java.io.BufferedReader
 import java.io.FileInputStream
-import java.util.*
 import java.io.InputStream
 
-//main is now the resolver yo
 fun main(args: Array<String>) {
 
+    assert(args.size == 3)
 
-    var hSet = false
-
-    val heuristics: Map<String, (Domain, Node) -> Int> = mapOf(
-            "h0" to { domain, node -> 0 }, //no heuristic! doesn't work!
-            "h-goal-lits" to { domain, node -> (domain.goal - node.state).size + domain.goalNeg.intersect(node.state).size }
-    )
-    var hPrime: (Domain, Node) -> Int = { domain, node -> 0 }
-    var weight = 1.0
-
-    args.forEach {
-        if (it.endsWith(".in")) {
-            System.setIn(FileInputStream(it))
-        } else if (!hSet && heuristics.containsKey(it)) {
-            hPrime = heuristics[it]!!
-            hSet = true
-        } else {
-            try {
-                weight = it.toDouble()
-                assert(weight >= 1)
-            } catch (e: Exception) {
-                weight = 1.0
-                println("expecting weight to be >= 1")
-            }
-        }
+    if (args[0].endsWith(".mdp")) {
+        System.setIn(FileInputStream(args[0]))
     }
 
-    val hFun: (Domain, Node) -> Int = { domain, node -> (hPrime(domain, node) * weight).toInt() }
+    val discountFactor = args[1].toDouble()
+    assert(discountFactor > 0 && discountFactor <= 1)
 
+    val terminationCriterion = args[2].toDouble()
 
     val reader = System.`in`
-    val domain = Parser.parse(reader, hFun)
+    val domain = parse(reader, discountFactor, terminationCriterion)
     reader.close()
 
-    val result = a_star(domain)
+    //initialized to reward cha
+    val utilities = Array(domain.states.size, { 0.0 })
+    var backupCount = 0
 
-    var node: Node? = result.node
-    if (node == null) {
-        println("no solution found")
+    var maxDiff = Double.MAX_VALUE
+
+    //vi
+    while (maxDiff > domain.terminationCriterion) {// || backupCount < 400) {
+        maxDiff = -Double.MAX_VALUE
+
+        val utilitiesCurrent = Array(domain.states.size, { 0.0 })
+
+        val diffs = mutableListOf<Double>()
+
+        domain.states.forEachIndexed { i, state ->
+            val newUtility = domain.states[i].reward + (domain.discountFactor * state.max(utilities))
+            diffs.add(newUtility)
+            utilitiesCurrent[i] = newUtility
+            maxDiff = Math.max(maxDiff, Math.abs(utilities[i] - newUtility))
+            backupCount++
+        }
+
+        utilitiesCurrent.forEachIndexed { index, double ->
+            utilities[index] = double
+        }
     }
 
-    val stack = Stack<Action>()
-    while (node != null && node.action != null) {
-        stack.add(node.action)
-        node = node.parent
+    //ok now at this point our utility numbers should be gucci, just need to print out argMax of each state
+    domain.states.forEach {
+        println(if (it.actions.isEmpty()) "" else it.argMax(utilities))
     }
 
-    var tick = 0
-
-    while (!stack.isEmpty()) {
-
-        val action = stack.pop()
-
-        val sb = StringBuilder()
-        sb.append("$tick ${action.name} ")
-        action.vars.forEach { sb.append("$it ") }
-
-        println(sb)
-        /*
-        0 Move B A C
-        1 FromTable A B
-        10 nodes generated
-        4 nodes expanded
-        */
-        tick++
-    }
-
-    println(result.generated.toString() + " nodes generated")
-    println(result.expanded.toString() + " nodes expanded")
+    println("$backupCount backups performed.")
 }
 
-fun a_star(domain: Domain): Result {
-    val openList = PriorityQueue<Node>()
-    openList.add(Node(domain.initState))
 
-    var gen = 1
-    var exp = 0
+fun parse(reader: InputStream, discountFactor: Double, terminationCriterion: Double): Domain {
+    fun readSkip(reader: BufferedReader): List<String> {
+        var line = "#"
+        while (line.startsWith('#')) {
+            line = reader.readLine()
+        }
+        return line.split(' ')
+    }
 
-    val closedList = HashSet<Node>()
+    val lines: BufferedReader = reader.bufferedReader()
 
-    var goal: Node? = null
+    val numStates = readSkip(lines).last().toInt()
 
-    while (!openList.isEmpty()) {
-        val current = openList.remove()
+    val startState = readSkip(lines).last().toInt()
 
-//        println(current)
+    val states = mutableListOf<State>()
 
-        if (current.state.containsAll(domain.goal) && current.state.intersect(domain.goalNeg).isEmpty()) {
-            goal = current
-            break
+    (1..numStates).forEach {
+        val firstLine = readSkip(lines)
+
+        val reward = firstLine[0].toDouble()
+        val terminal = firstLine[1] == "1"
+        val numActions = firstLine[2].toInt()
+
+        val actions = mutableListOf<Action>()
+
+        (1..numActions).forEach {
+            val actionString = readSkip(lines)
+
+            val numSuccessors = actionString[0].toInt()
+            val action = mutableListOf<Pair<Int, Double>>()
+            (1..numSuccessors).forEach { j ->
+                action.add(Pair(actionString[j * 2 - 1].toInt(), actionString[j * 2].toDouble()))
+            }
+            actions.add(Action(action))
         }
 
-        if (!closedList.contains(current)) { //because openList may contain multiple copies of a node, we need to check this
-            closedList.add(current)
-            exp++
-            val children = current.genChildren(domain)
-            gen += children.size
+        states.add(State(reward, terminal, actions))
+    }
 
-            children.forEach {
-                if (!closedList.contains(it)) {
-                    openList.add(it)
-                    //our openlist will contain multiple copies, but only the best will be opened
-                }
+    reader.close()
+
+    return Domain(startState, states, discountFactor, terminationCriterion)
+}
+
+data class Domain(val s0: Int, val states: List<State>, val discountFactor: Double, val terminationCriterion: Double)
+
+data class State(val reward: Double, val terminalState: Boolean, val actions: List<Action>) {
+
+    fun max(utility: Array<Double>): Double {
+        if (actions.isEmpty()) return 0.0
+
+        var maxValue = -Double.MAX_VALUE
+        actions.forEach {
+            maxValue = Math.max(maxValue, it.value(utility))
+        }
+
+        return maxValue
+    }
+
+    fun argMax(utility: Array<Double>): Int {
+        var maxValue = -Double.MAX_VALUE
+        var maxAction = 0
+
+        actions.forEachIndexed { i, action ->
+            if (action.value(utility) > maxValue) {
+                maxValue = action.value(utility)
+                maxAction = i
             }
         }
+
+        return maxAction
     }
-    return Result(goal, gen, exp)
+}
+
+data class Action(val action: List<Pair<Int/*destination state*/, Double/*transition probability*/>>) {
+
+    fun value(utility: Array<Double>): Double {
+        var sum = 0.0
+        action.forEachIndexed { i, pair ->
+            sum += pair.second * utility[pair.first]
+        }
+        return sum
+    }
 }
